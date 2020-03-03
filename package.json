@@ -1,0 +1,62 @@
+{
+    "name": "pyls_bess",
+    "description": "Bess plugin for pyls",
+    "author": "Felicián Németh",
+    "repository": "https://github.com/Microsoft/vscode-languageserver-node",
+    "license": "GPLv3+",
+    "version": "0.0.1",
+    "contributes": {
+        "configuration": {
+            "title": "pyls_bess Configuration",
+            "type": "object",
+            "properties": {
+                "pyls.plugins.bess.definitions": {
+                    "type": "array",
+                    "default": [
+                        "project",
+                        "cpp_definition"
+                    ],
+                    "description": "List of ref_types to show for 'Go to definition'.",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "cpp_definition",
+                            "examples",
+                            "mclass",
+                            "project",
+                            "protobuf"
+                        ]
+                    },
+                    "uniqueItems": true
+                },
+                "pyls.plugins.bess.references": {
+                    "type": "array",
+                    "default": [
+                        "project",
+                        "cpp_definition",
+                        "mclass",
+                        "protobuf",
+                        "examples"
+                    ],
+                    "description": "List of ref_types to show for 'Go to references'.",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "cpp_definition",
+                            "examples",
+                            "mclass",
+                            "project",
+                            "protobuf"
+                        ]
+                    },
+                    "uniqueItems": true
+                },
+                "pyls.plugins.bess.source_directory" : {
+                    "type": "string",
+                    "default": "",
+                    "description": "Path of the bess source directory.  If empty, bessls checks the BESS environment variable."
+                }
+            }
+        }
+    }
+}

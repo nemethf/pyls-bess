@@ -1,0 +1,5 @@
+include README.md
+include COPYING
+include pyls_bess/*.py
+include pyls_bess/bess_doc/*
+include pyls_bess/bess_doc/mclass/*
