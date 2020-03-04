@@ -59,14 +59,6 @@ uint64 = int
 class ACLArg(TypedDict):
   rules: List[Rule]
 
-class Rule(TypedDict):
-  src_ip: string
-  dst_ip: string
-  src_port: uint32
-  dst_port: uint32
-  established: bool
-  drop: bool
-
 class AddTcRequest(TypedDict):
   klass: TrafficClass
 
@@ -75,17 +67,29 @@ class AddWorkerRequest(TypedDict):
   core: int64
   scheduler: string
 
+class AddressRange(TypedDict):
+  start: string
+  end: string
+
+class AddressRangePair(TypedDict):
+  int_range: AddressRange
+  ext_range: AddressRange
+
 class ArpResponderArg(TypedDict):
   ip: string
   mac_addr: string
 
+class Attribute(TypedDict):
+  name: string
+  size: uint64
+  value_int: uint64
+  value_bin: bytes
+  offset: int32
+  mask: bytes
+  rshift_bits: int32
+
 class BPFArg(TypedDict):
   filters: List[Filter]
-
-class Filter(TypedDict):
-  priority: int64
-  filter: string
-  gate: int64
 
 class BPFCommandClearArg(TypedDict):
   pass
@@ -103,15 +107,6 @@ class CheckSchedulingConstraintsResponse(TypedDict):
   fatal: bool
   violations: List[ViolatingClass]
   modules: List[ViolatingModule]
-
-class ViolatingClass(TypedDict):
-  name: string
-  constraint: int32
-  assigned_node: int32
-  assigned_core: int32
-
-class ViolatingModule(TypedDict):
-  name: string
 
 class CommandRequest(TypedDict):
   name: string
@@ -208,6 +203,15 @@ class EmptyRequest(TypedDict):
 class EmptyResponse(TypedDict):
   error: Error
 
+class EncapField(TypedDict):
+  size: uint64
+  attribute: string
+  value: FieldData
+
+class Entry(TypedDict):
+  addr: string
+  gate: int64
+
 class Error(TypedDict):
   code: int32
   errmsg: string
@@ -236,6 +240,10 @@ class ExactMatchConfig(TypedDict):
   default_gate: uint64
   rules: List[ExactMatchCommandAddArg]
 
+class ExternalAddress(TypedDict):
+  ext_addr: string
+  port_ranges: List[PortRange]
+
 class Field(TypedDict):
   offset: int64
   size: uint64
@@ -244,6 +252,11 @@ class Field(TypedDict):
 class FieldData(TypedDict):
   value_bin: bytes
   value_int: uint64
+
+class Filter(TypedDict):
+  priority: int64
+  filter: string
+  gate: int64
 
 class FlowGenArg(TypedDict):
   template: bytes
@@ -260,6 +273,10 @@ class FlowGenArg(TypedDict):
 
 class FlowGenCommandSetBurstArg(TypedDict):
   burst: uint64
+
+class GateHook(TypedDict):
+  class_name: string
+  hook_name: string
 
 class GateHookCommandRequest(TypedDict):
   hook: GateHookInfo
@@ -278,11 +295,6 @@ class GenericDecapArg(TypedDict):
 
 class GenericEncapArg(TypedDict):
   fields: List[EncapField]
-
-class EncapField(TypedDict):
-  size: uint64
-  attribute: string
-  value: FieldData
 
 class GetDriverInfoRequest(TypedDict):
   driver_name: string
@@ -336,38 +348,6 @@ class GetModuleInfoResponse(TypedDict):
   metadata: List[Attribute]
   deadends: uint64
 
-class Attribute(TypedDict):
-  name: string
-  size: uint64
-  value_int: uint64
-  value_bin: bytes
-  offset: int32
-  mask: bytes
-  rshift_bits: int32
-
-class GateHook(TypedDict):
-  class_name: string
-  hook_name: string
-
-class IGate(TypedDict):
-  igate: uint64
-  ogates: List[OGate]
-  cnt: uint64
-  pkts: uint64
-  bytes: uint64
-  timestamp: double
-  gatehooks: List[GateHook]
-
-class OGate(TypedDict):
-  ogate: uint64
-  cnt: uint64
-  pkts: uint64
-  bytes: uint64
-  timestamp: double
-  name: string
-  igate: uint64
-  gatehooks: List[GateHook]
-
 class GetPortConfRequest(TypedDict):
   name: string
 
@@ -383,14 +363,6 @@ class GetPortStatsResponse(TypedDict):
   inc: Stat
   out: Stat
   timestamp: double
-
-class Stat(TypedDict):
-  packets: uint64
-  dropped: uint64
-  bytes: uint64
-  requested_hist: List[uint64]
-  actual_hist: List[uint64]
-  diff_hist: List[uint64]
 
 class GetTcStatsRequest(TypedDict):
   name: string
@@ -414,6 +386,25 @@ class HashLBCommandSetGatesArg(TypedDict):
 class HashLBCommandSetModeArg(TypedDict):
   mode: string
   fields: List[Field]
+
+class Histogram(TypedDict):
+  count: uint64
+  above_range: uint64
+  resolution_ns: uint64
+  min_ns: uint64
+  avg_ns: uint64
+  max_ns: uint64
+  total_ns: uint64
+  percentile_values_ns: List[uint64]
+
+class IGate(TypedDict):
+  igate: uint64
+  ogates: List[OGate]
+  cnt: uint64
+  pkts: uint64
+  bytes: uint64
+  timestamp: double
+  gatehooks: List[GateHook]
 
 class IPEncapArg(TypedDict):
   pass
@@ -444,10 +435,6 @@ class L2ForwardArg(TypedDict):
 class L2ForwardCommandAddArg(TypedDict):
   entries: List[Entry]
 
-class Entry(TypedDict):
-  addr: string
-  gate: int64
-
 class L2ForwardCommandDeleteArg(TypedDict):
   addrs: List[string]
 
@@ -464,6 +451,10 @@ class L2ForwardCommandPopulateArg(TypedDict):
 
 class L2ForwardCommandSetDefaultGateArg(TypedDict):
   gate: int64
+
+class LimitEntry(TypedDict):
+  key: string
+  value: int64
 
 class ListDriversResponse(TypedDict):
   error: Error
@@ -485,11 +476,6 @@ class ListModulesResponse(TypedDict):
   error: Error
   modules: List[Module]
 
-class Module(TypedDict):
-  name: string
-  mclass: string
-  desc: string
-
 class ListPluginsResponse(TypedDict):
   error: Error
   paths: List[string]
@@ -498,11 +484,6 @@ class ListPortsResponse(TypedDict):
   error: Error
   ports: List[Port]
 
-class Port(TypedDict):
-  name: string
-  driver: string
-  mac_addr: string
-
 class ListTcsRequest(TypedDict):
   wid: int64
 
@@ -510,23 +491,16 @@ class ListTcsResponse(TypedDict):
   error: Error
   classes_status: List[TrafficClassStatus]
 
-class TrafficClassStatus(TypedDict):
-  klass: TrafficClass
-  parent: string
-
 class ListWorkersResponse(TypedDict):
   error: Error
   workers_status: List[WorkerStatus]
 
-class WorkerStatus(TypedDict):
-  wid: int64
-  core: int64
-  running: bool
-  num_tcs: int64
-  silent_drops: int64
-
 class MACSwapArg(TypedDict):
   pass
+
+class MaxBurstEntry(TypedDict):
+  key: string
+  value: int64
 
 class MeasureArg(TypedDict):
   offset: uint64
@@ -545,16 +519,6 @@ class MeasureCommandGetSummaryResponse(TypedDict):
   bits: uint64
   latency: Histogram
   jitter: Histogram
-
-class Histogram(TypedDict):
-  count: uint64
-  above_range: uint64
-  resolution_ns: uint64
-  min_ns: uint64
-  avg_ns: uint64
-  max_ns: uint64
-  total_ns: uint64
-  percentile_values_ns: List[uint64]
 
 class MempoolDump(TypedDict):
   socket: int32
@@ -577,17 +541,10 @@ class MetadataTestArg(TypedDict):
   write: List[WriteEntry]
   update: List[UpdateEntry]
 
-class ReadEntry(TypedDict):
-  key: string
-  value: int64
-
-class UpdateEntry(TypedDict):
-  key: string
-  value: int64
-
-class WriteEntry(TypedDict):
-  key: string
-  value: int64
+class Module(TypedDict):
+  name: string
+  mclass: string
+  desc: string
 
 class MplsPopArg(TypedDict):
   remove_eth_header: bool
@@ -596,17 +553,18 @@ class MplsPopArg(TypedDict):
 class NATArg(TypedDict):
   ext_addrs: List[ExternalAddress]
 
-class ExternalAddress(TypedDict):
-  ext_addr: string
-  port_ranges: List[PortRange]
-
-class PortRange(TypedDict):
-  begin: uint32
-  end: uint32
-  suspended: bool
-
 class NoOpArg(TypedDict):
   pass
+
+class OGate(TypedDict):
+  ogate: uint64
+  cnt: uint64
+  pkts: uint64
+  bytes: uint64
+  timestamp: double
+  name: string
+  igate: uint64
+  gatehooks: List[GateHook]
 
 class PauseWorkerRequest(TypedDict):
   wid: int64
@@ -615,6 +573,16 @@ class PcapngArg(TypedDict):
   fifo: string
   defer: bool
   reconnect: bool
+
+class Port(TypedDict):
+  name: string
+  driver: string
+  mac_addr: string
+  num_inc_q: uint64
+  num_out_q: uint64
+  size_inc_q: uint64
+  size_out_q: uint64
+  driver_arg: Any
 
 class PortConf(TypedDict):
   mac_addr: string
@@ -630,6 +598,11 @@ class PortIncCommandSetBurstArg(TypedDict):
 
 class PortOutArg(TypedDict):
   port: string
+
+class PortRange(TypedDict):
+  begin: uint32
+  end: uint32
+  suspended: bool
 
 class QueueArg(TypedDict):
   size: uint64
@@ -680,6 +653,10 @@ class RandomUpdateArg(TypedDict):
 class RandomUpdateCommandClearArg(TypedDict):
   pass
 
+class ReadEntry(TypedDict):
+  key: string
+  value: int64
+
 class ReplicateArg(TypedDict):
   gates: List[int64]
 
@@ -705,6 +682,14 @@ class RoundRobinCommandSetGatesArg(TypedDict):
 class RoundRobinCommandSetModeArg(TypedDict):
   mode: string
 
+class Rule(TypedDict):
+  src_ip: string
+  dst_ip: string
+  src_port: uint32
+  dst_port: uint32
+  established: bool
+  drop: bool
+
 class SetMetadataArg(TypedDict):
   attrs: List[Attribute]
 
@@ -729,16 +714,16 @@ class SplitArg(TypedDict):
   attribute: string
   offset: int64
 
+class Stat(TypedDict):
+  packets: uint64
+  dropped: uint64
+  bytes: uint64
+  requested_hist: List[uint64]
+  actual_hist: List[uint64]
+  diff_hist: List[uint64]
+
 class StaticNATArg(TypedDict):
   pairs: List[AddressRangePair]
-
-class AddressRange(TypedDict):
-  start: string
-  end: string
-
-class AddressRangePair(TypedDict):
-  int_range: AddressRange
-  ext_range: AddressRange
 
 class TcpdumpArg(TypedDict):
   fifo: string
@@ -765,13 +750,9 @@ class TrafficClass(TypedDict):
   leaf_module_name: string
   leaf_module_taskid: uint64
 
-class LimitEntry(TypedDict):
-  key: string
-  value: int64
-
-class MaxBurstEntry(TypedDict):
-  key: string
-  value: int64
+class TrafficClassStatus(TypedDict):
+  klass: TrafficClass
+  parent: string
 
 class UnloadPluginRequest(TypedDict):
   path: string
@@ -782,18 +763,22 @@ class UpdateArg(TypedDict):
 class UpdateCommandClearArg(TypedDict):
   pass
 
+class UpdateEntry(TypedDict):
+  key: string
+  value: int64
+
 class UpdateTcParamsRequest(TypedDict):
   klass: TrafficClass
 
 class UpdateTcParentRequest(TypedDict):
   klass: TrafficClass
 
-class UrlFilterArg(TypedDict):
-  blacklist: List[Url]
-
 class Url(TypedDict):
   host: string
   path: string
+
+class UrlFilterArg(TypedDict):
+  blacklist: List[Url]
 
 class UrlFilterConfig(TypedDict):
   blacklist: List[Url]
@@ -816,6 +801,15 @@ class VXLANEncapArg(TypedDict):
 class VersionResponse(TypedDict):
   error: Error
   version: string
+
+class ViolatingClass(TypedDict):
+  name: string
+  constraint: int32
+  assigned_node: int32
+  assigned_core: int32
+
+class ViolatingModule(TypedDict):
+  name: string
 
 class WildcardMatchArg(TypedDict):
   fields: List[Field]
@@ -840,12 +834,23 @@ class WildcardMatchConfig(TypedDict):
   default_gate: uint64
   rules: List[WildcardMatchCommandAddArg]
 
-class WorkerSplitArg(TypedDict):
-  worker_gates: List[WorkerGatesEntry]
-
 class WorkerGatesEntry(TypedDict):
   key: uint32
   value: uint32
+
+class WorkerSplitArg(TypedDict):
+  worker_gates: List[WorkerGatesEntry]
+
+class WorkerStatus(TypedDict):
+  wid: int64
+  core: int64
+  running: bool
+  num_tcs: int64
+  silent_drops: int64
+
+class WriteEntry(TypedDict):
+  key: string
+  value: int64
 
 class ACL(BessModule):
   """
@@ -2051,6 +2056,11 @@ class PortInc(BessModule):
     """
     ...
 
+  def get_initial_arg(
+    self
+    ):
+    ...
+
 
 class PortOut(BessModule):
   """
@@ -2078,6 +2088,11 @@ class PortOut(BessModule):
 
     :param port: The portname to connect to.
     """
+    ...
+
+  def get_initial_arg(
+    self
+    ):
     ...
 
 
@@ -2145,6 +2160,11 @@ class Queue(BessModule):
     `get_status()` that take no parameters and returns the queue occupancy and
     size.
     """
+    ...
+
+  def get_initial_arg(
+    self
+    ):
     ...
 
   def get_runtime_config(
@@ -2532,6 +2552,11 @@ class SetMetadata(BessModule):
 
     :param attrs: A list of attributes to attach to the packet.
     """
+    ...
+
+  def get_initial_arg(
+    self
+    ):
     ...
 
 
