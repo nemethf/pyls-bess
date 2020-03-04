@@ -273,3 +273,31 @@ def insert_bess_refs(config, document, goto_kind, refs):
     for ref_type in get_ref_types(config, document, goto_kind):
         refs += ref_groups[ref_type]
     return refs
+
+
+###########################################################################
+
+# Because of the hidden 'import_line', pyflakes_lint becomes quite
+# useless.  Fix it by filtering error messages about star import.
+
+try:
+    import pyflakes.messages
+    PYFLAKES_IGNORED_MESSAGES = (
+        pyflakes.messages.ImportStarUsed,
+        pyflakes.messages.ImportStarUsage,
+    )
+except ModuleNotFoundError:
+    PYFLAKES_IGNORED_MESSAGES = ()
+
+from pyls.plugins.pyflakes_lint import PyflakesDiagnosticReport as DiagReport
+old_flake = DiagReport.flake
+def new_flake(self, message):
+    if not message.filename.endswith('.bess'):
+        return old_flake(self, message)
+
+    for message_type in PYFLAKES_IGNORED_MESSAGES:
+        if isinstance(message, message_type):
+            break
+    else:
+        old_flake(self, message)
+DiagReport.flake = new_flake
