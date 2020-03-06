@@ -23,13 +23,19 @@ import json
 import logging
 import os
 import re
-from pyls import hookimpl, uris
+from pyls import hookimpl, lsp, uris
 from pyls.config import config as pyls_config
 
 from .bess_conf import BessConfig
 from .sugar import replace_rarrows
 
 log = logging.getLogger(__name__)
+
+# Ignored only when the source line contains an arrow.
+LINT_IGNORED_MESSAGES = {
+    'pycodestyle': ('E203', 'E225', 'E231', 'E702'),
+}
+lint_ignored_regex = {}
 
 # Monkey patch :(
 # But this way it's easier to sync with upstream, and
@@ -84,7 +90,11 @@ def new_source(self):
         src = import_line + '; ' + src
     src = re.sub(r'\$\w(\w*)!', "'\\1'+", src)
     src = src.replace('::', '= ')
-    src = replace_rarrows(src)
+    src, arrows = replace_rarrows(src)
+
+    self.bess_arrows = {}
+    for row, col in arrows:
+        self.bess_arrows[row] = 1
     return src
 Document.source = new_source
 
@@ -122,6 +132,52 @@ def pyls_settings(config):
 def pyls_initialize(config, workspace):
     workspace.bess_dir = get_spath(config)
     log.debug('pyls_initialize bess_dir: %s', workspace.bess_dir)
+
+    global lint_ignored_regexs
+    for module, messages in LINT_IGNORED_MESSAGES.items():
+        pattern = "^(" + '|'.join(messages) + r')\b'
+        lint_ignored_regex[module] = re.compile(pattern)
+
+    diag = ''
+    if not os.path.exists(os.path.join(workspace.bess_dir, 'bessctl')):
+        diag = f'Bess sources not found in {workspace.bess_dir}'
+    workspace.bess_init_diag = diag
+
+@hookimpl(hookwrapper=True)
+def pyls_lint(workspace, document):
+    def keep_lint(l):
+        # Filter messages that can be a result of the removal of the
+        # syntactic sugar.
+        try:
+            row = l['range']['start']['line']
+            if row not in document.bess_arrows:
+                return True
+        except (KeyError, AttributeError):
+            return True
+        regex = lint_ignored_regex.get(l['source'])
+        if regex and regex.match(l['message']):
+            return False
+        return True
+
+    outcome = yield
+    if not document.uri.endswith('.bess'):
+        return outcome
+    try:
+        result = outcome.get_result()
+    except Exception as e:
+        return
+    filtered = []
+    if workspace.bess_init_diag:
+        filtered.append([{
+            'source': 'pyls-bess',
+            'range': { 'start': {'line': 0, 'character': 0},
+                       'end': {'line':0, 'character': 100}},
+            'message': workspace.bess_init_diag,
+            'severity': lsp.DiagnosticSeverity.Warning
+        }])
+    for res in result:
+        filtered.append([r for r in res if keep_lint(r)])
+    outcome.force_result(filtered)
 
 @hookimpl(hookwrapper=True)
 def pyls_definitions(config, document, position):
@@ -279,6 +335,10 @@ def insert_bess_refs(config, document, goto_kind, refs):
 
 # Because of the hidden 'import_line', pyflakes_lint becomes quite
 # useless.  Fix it by filtering error messages about star import.
+# These diagnostics may affect lines without arrows, so the
+# keep_lint() approach is not good.  Also, we cannot do the filtering
+# in pyls_lint(), because message types (eg. ImportStarUsed) are no
+# longer available there.
 
 try:
     import pyflakes.messages

@@ -140,7 +140,7 @@ def replace_rarrows(s):
 
             colon_pos = seg.find(':', colon_pos + 1)
 
-    return '; '.join(segments)
+    return '; '.join(segments), arrows
 
 if __name__ == '__main__':
     s = """
