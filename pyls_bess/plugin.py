@@ -75,7 +75,7 @@ def new_source(self):
     #  self._source = self.source + text
     # which modifies _source if we return the transformed source here.
     stack = inspect.stack()
-    if stack[2].function == 'apply_change':
+    if stack[1].function == 'apply_change':
         return src
 
     import_line = 'from pyls_bess.bess_doc.mclass import *'
