@@ -339,25 +339,27 @@ def insert_bess_refs(config, document, goto_kind, refs):
 # keep_lint() approach is not good.  Also, we cannot do the filtering
 # in pyls_lint(), because message types (eg. ImportStarUsed) are no
 # longer available there.
-
-try:
+def patch_pyflakes_lint():
     import pyflakes.messages
     PYFLAKES_IGNORED_MESSAGES = (
         pyflakes.messages.ImportStarUsed,
         pyflakes.messages.ImportStarUsage,
     )
+
+    from pyls.plugins.pyflakes_lint import PyflakesDiagnosticReport as DiagReport
+    old_flake = DiagReport.flake
+    def new_flake(self, message):
+        if not message.filename.endswith('.bess'):
+            return old_flake(self, message)
+
+        for message_type in PYFLAKES_IGNORED_MESSAGES:
+            if isinstance(message, message_type):
+                break
+        else:
+            old_flake(self, message)
+    DiagReport.flake = new_flake
+
+try:
+    patch_pyflakes_lint()
 except ModuleNotFoundError:
-    PYFLAKES_IGNORED_MESSAGES = ()
-
-from pyls.plugins.pyflakes_lint import PyflakesDiagnosticReport as DiagReport
-old_flake = DiagReport.flake
-def new_flake(self, message):
-    if not message.filename.endswith('.bess'):
-        return old_flake(self, message)
-
-    for message_type in PYFLAKES_IGNORED_MESSAGES:
-        if isinstance(message, message_type):
-            break
-    else:
-        old_flake(self, message)
-DiagReport.flake = new_flake
+    pass

@@ -13,7 +13,7 @@ setup(
     url='https://github.com/nemethf/pyls-bess',
     author='Felicián Németh',
     packages=find_packages(exclude=['resources']),
-    install_requires=['python-language-server'],
+    install_requires=['python-language-server', 'pycodestyle'],
     extras_require={},
     entry_points={'pyls': ['pyls_bess = pyls_bess.plugin']},
     include_package_data=True,
