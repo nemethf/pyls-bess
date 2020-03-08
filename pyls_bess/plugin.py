@@ -27,7 +27,7 @@ from pyls import hookimpl, lsp, uris
 from pyls.config import config as pyls_config
 
 from .bess_conf import BessConfig
-from .sugar import replace_rarrows
+from .sugar import replace_rarrows, replace_double_colon
 
 log = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def new_source(self):
     #  self._source = self.source + text
     # which modifies _source if we return the transformed source here.
     stack = inspect.stack()
-    if stack[1].function == 'apply_change':
+    if 'apply_change' in [s.function for s in stack[1:3]]:
         return src
 
     import_line = 'from pyls_bess.bess_doc.mclass import *'
@@ -89,12 +89,12 @@ def new_source(self):
         # incorrect column numbers for the first line.
         src = import_line + '; ' + src
     src = re.sub(r'\$\w(\w*)!', "'\\1'+", src)
-    src = src.replace('::', '= ')
-    src, arrows = replace_rarrows(src)
 
-    self.bess_arrows = {}
+    src, self.bess_rows_with_sugar = replace_double_colon(src)
+    src, arrows = replace_rarrows(src)
     for row, col in arrows:
-        self.bess_arrows[row] = 1
+        self.bess_rows_with_sugar[row] = 1
+
     return src
 Document.source = new_source
 
@@ -150,7 +150,7 @@ def pyls_lint(workspace, document):
         # syntactic sugar.
         try:
             row = l['range']['start']['line']
-            if row not in document.bess_arrows:
+            if row not in document.bess_rows_with_sugar:
                 return True
         except (KeyError, AttributeError):
             return True

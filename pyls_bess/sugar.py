@@ -31,9 +31,10 @@
 
 # based on bess/bessctl/sugar.py
 
-import tokenize
-import parser
 import io
+import parser
+import re
+import tokenize
 
 def is_gate_expr(exp, is_ogate):
     # check if the leading/trailing whitespace characters contains '\n'
@@ -141,6 +142,17 @@ def replace_rarrows(s):
             colon_pos = seg.find(':', colon_pos + 1)
 
     return '; '.join(segments), arrows
+
+def replace_double_colon(s):
+    rows = {}
+    text = ''
+    for row, line in enumerate(io.StringIO(s).readlines()):
+        line, cnt = re.subn(r'::', '= ', line)
+        text += line
+        if cnt:
+            rows[row] = 1
+    return text, rows
+
 
 if __name__ == '__main__':
     s = """
