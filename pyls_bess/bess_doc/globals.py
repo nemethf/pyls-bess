@@ -35,6 +35,7 @@
 
 
 from pybess.module import Module as BessModule # type: ignore
+from pybess.port import Port # type: ignore
 from pybess.bess import BESS # type: ignore
 
 bess = BESS()
@@ -56,30 +57,15 @@ string = str
 uint32 = int
 uint64 = int
 
-class ACLArg(TypedDict):
-  rules: List[Rule]
-
-class AddTcRequest(TypedDict):
-  klass: TrafficClass
-
-class AddWorkerRequest(TypedDict):
-  wid: int64
-  core: int64
-  scheduler: string
-
-class AddressRange(TypedDict):
+class AddressRange(TypedDict, total=False):
   start: string
   end: string
 
-class AddressRangePair(TypedDict):
-  int_range: AddressRange
-  ext_range: AddressRange
+class AddressRangePair(TypedDict, total=False):
+  int_range: StaticNATArgAddressRange
+  ext_range: StaticNATArgAddressRange
 
-class ArpResponderArg(TypedDict):
-  ip: string
-  mac_addr: string
-
-class Attribute(TypedDict):
+class SetMetadataArgAttribute(TypedDict, total=False):
   name: string
   size: uint64
   value_int: uint64
@@ -88,306 +74,59 @@ class Attribute(TypedDict):
   mask: bytes
   rshift_bits: int32
 
-class BPFArg(TypedDict):
-  filters: List[Filter]
-
-class BPFCommandClearArg(TypedDict):
+class BPFCommandClearArg(TypedDict, total=False):
   pass
 
-class BufferArg(TypedDict):
-  pass
-
-class BypassArg(TypedDict):
-  cycles_per_batch: uint32
-  cycles_per_packet: uint32
-  cycles_per_byte: uint32
-
-class CheckSchedulingConstraintsResponse(TypedDict):
-  error: Error
-  fatal: bool
-  violations: List[ViolatingClass]
-  modules: List[ViolatingModule]
-
-class CommandRequest(TypedDict):
-  name: string
-  cmd: string
-  arg: Any
-
-class CommandResponse(TypedDict):
-  error: Error
-  data: Any
-
-class ConfigureGateHookRequest(TypedDict):
-  hook: GateHookInfo
-  enable: bool
-
-class ConfigureGateHookResponse(TypedDict):
-  error: Error
-  name: string
-
-class ConfigureResumeHookRequest(TypedDict):
-  hook_name: string
-  enable: bool
-  arg: Any
-
-class ConnectModulesRequest(TypedDict):
-  m1: string
-  m2: string
-  ogate: uint64
-  igate: uint64
-  skip_default_hooks: bool
-
-class CreateModuleRequest(TypedDict):
-  name: string
-  mclass: string
-  arg: Any
-
-class CreateModuleResponse(TypedDict):
-  error: Error
-  name: string
-
-class CreatePortRequest(TypedDict):
-  name: string
-  driver: string
-  num_inc_q: uint64
-  num_out_q: uint64
-  size_inc_q: uint64
-  size_out_q: uint64
-  arg: Any
-
-class CreatePortResponse(TypedDict):
-  error: Error
-  name: string
-  mac_addr: string
-
-class DRRArg(TypedDict):
-  num_flows: uint32
-  quantum: uint64
-  max_flow_queue_size: uint32
-
-class DRRMaxFlowQueueSizeArg(TypedDict):
-  max_queue_size: uint32
-
-class DRRQuantumArg(TypedDict):
-  quantum: uint32
-
-class DestroyModuleRequest(TypedDict):
-  name: string
-
-class DestroyPortRequest(TypedDict):
-  name: string
-
-class DestroyWorkerRequest(TypedDict):
-  wid: int64
-
-class DisconnectModulesRequest(TypedDict):
-  name: string
-  ogate: uint64
-
-class DumpArg(TypedDict):
-  interval: double
-
-class DumpMempoolRequest(TypedDict):
-  socket: int32
-
-class DumpMempoolResponse(TypedDict):
-  error: Error
-  dumps: List[MempoolDump]
-
-class EmptyArg(TypedDict):
-  pass
-
-class EmptyRequest(TypedDict):
-  pass
-
-class EmptyResponse(TypedDict):
-  error: Error
-
-class EncapField(TypedDict):
+class EncapField(TypedDict, total=False):
   size: uint64
   attribute: string
   value: FieldData
 
-class Entry(TypedDict):
+class Entry(TypedDict, total=False):
   addr: string
   gate: int64
 
-class Error(TypedDict):
-  code: int32
-  errmsg: string
-
-class EtherEncapArg(TypedDict):
-  pass
-
-class ExactMatchArg(TypedDict):
-  fields: List[Field]
-  masks: List[FieldData]
-
-class ExactMatchCommandAddArg(TypedDict):
+class ExactMatchCommandAddArg(TypedDict, total=False):
   gate: uint64
   fields: List[FieldData]
 
-class ExactMatchCommandClearArg(TypedDict):
+class ExactMatchCommandClearArg(TypedDict, total=False):
   pass
 
-class ExactMatchCommandDeleteArg(TypedDict):
-  fields: List[FieldData]
-
-class ExactMatchCommandSetDefaultGateArg(TypedDict):
-  gate: uint64
-
-class ExactMatchConfig(TypedDict):
+class ExactMatchConfig(TypedDict, total=False):
   default_gate: uint64
   rules: List[ExactMatchCommandAddArg]
 
-class ExternalAddress(TypedDict):
+class ExternalAddress(TypedDict, total=False):
   ext_addr: string
   port_ranges: List[PortRange]
 
-class Field(TypedDict):
+class Field(TypedDict, total=False):
+  attr_name: string
+  offset: uint32
+  num_bytes: uint32
+
+class RandomUpdateArgField(TypedDict, total=False):
+  offset: int64
+  size: uint64
+  min: uint64
+  max: uint64
+
+class UpdateArgField(TypedDict, total=False):
   offset: int64
   size: uint64
   value: uint64
 
-class FieldData(TypedDict):
+class FieldData(TypedDict, total=False):
   value_bin: bytes
   value_int: uint64
 
-class Filter(TypedDict):
+class Filter(TypedDict, total=False):
   priority: int64
   filter: string
   gate: int64
 
-class FlowGenArg(TypedDict):
-  template: bytes
-  pps: double
-  flow_rate: double
-  flow_duration: double
-  arrival: string
-  duration: string
-  quick_rampup: bool
-  ip_src_range: uint32
-  ip_dst_range: uint32
-  port_src_range: uint32
-  port_dst_range: uint32
-
-class FlowGenCommandSetBurstArg(TypedDict):
-  burst: uint64
-
-class GateHook(TypedDict):
-  class_name: string
-  hook_name: string
-
-class GateHookCommandRequest(TypedDict):
-  hook: GateHookInfo
-  cmd: string
-
-class GateHookInfo(TypedDict):
-  class_name: string
-  hook_name: string
-  module_name: string
-  igate: int64
-  ogate: int64
-  arg: Any
-
-class GenericDecapArg(TypedDict):
-  bytes: uint64
-
-class GenericEncapArg(TypedDict):
-  fields: List[EncapField]
-
-class GetDriverInfoRequest(TypedDict):
-  driver_name: string
-
-class GetDriverInfoResponse(TypedDict):
-  error: Error
-  name: string
-  help: string
-  commands: List[string]
-
-class GetGateHookClassInfoRequest(TypedDict):
-  name: string
-
-class GetGateHookClassInfoResponse(TypedDict):
-  error: Error
-  name: string
-  help: string
-  cmds: List[string]
-  cmd_args: List[string]
-
-class GetLinkStatusRequest(TypedDict):
-  name: string
-
-class GetLinkStatusResponse(TypedDict):
-  error: Error
-  speed: uint32
-  full_duplex: bool
-  autoneg: bool
-  link_up: bool
-
-class GetMclassInfoRequest(TypedDict):
-  name: string
-
-class GetMclassInfoResponse(TypedDict):
-  error: Error
-  name: string
-  help: string
-  cmds: List[string]
-  cmd_args: List[string]
-
-class GetModuleInfoRequest(TypedDict):
-  name: string
-
-class GetModuleInfoResponse(TypedDict):
-  error: Error
-  name: string
-  mclass: string
-  desc: string
-  igates: List[IGate]
-  ogates: List[OGate]
-  metadata: List[Attribute]
-  deadends: uint64
-
-class GetPortConfRequest(TypedDict):
-  name: string
-
-class GetPortConfResponse(TypedDict):
-  error: Error
-  conf: PortConf
-
-class GetPortStatsRequest(TypedDict):
-  name: string
-
-class GetPortStatsResponse(TypedDict):
-  error: Error
-  inc: Stat
-  out: Stat
-  timestamp: double
-
-class GetTcStatsRequest(TypedDict):
-  name: string
-
-class GetTcStatsResponse(TypedDict):
-  error: Error
-  timestamp: double
-  count: uint64
-  cycles: uint64
-  packets: uint64
-  bits: uint64
-
-class HashLBArg(TypedDict):
-  gates: List[int64]
-  mode: string
-  fields: List[Field]
-
-class HashLBCommandSetGatesArg(TypedDict):
-  gates: List[int64]
-
-class HashLBCommandSetModeArg(TypedDict):
-  mode: string
-  fields: List[Field]
-
-class Histogram(TypedDict):
+class Histogram(TypedDict, total=False):
   count: uint64
   above_range: uint64
   resolution_ns: uint64
@@ -397,292 +136,42 @@ class Histogram(TypedDict):
   total_ns: uint64
   percentile_values_ns: List[uint64]
 
-class IGate(TypedDict):
-  igate: uint64
-  ogates: List[OGate]
-  cnt: uint64
-  pkts: uint64
-  bytes: uint64
-  timestamp: double
-  gatehooks: List[GateHook]
-
-class IPEncapArg(TypedDict):
+class IPLookupCommandClearArg(TypedDict, total=False):
   pass
 
-class IPLookupArg(TypedDict):
-  max_rules: uint32
-  max_tbl8s: uint32
-
-class IPLookupCommandAddArg(TypedDict):
-  prefix: string
-  prefix_len: uint64
-  gate: uint64
-
-class IPLookupCommandClearArg(TypedDict):
-  pass
-
-class IPLookupCommandDeleteArg(TypedDict):
-  prefix: string
-  prefix_len: uint64
-
-class ImportPluginRequest(TypedDict):
-  path: string
-
-class L2ForwardArg(TypedDict):
-  size: int64
-  bucket: int64
-
-class L2ForwardCommandAddArg(TypedDict):
-  entries: List[Entry]
-
-class L2ForwardCommandDeleteArg(TypedDict):
-  addrs: List[string]
-
-class L2ForwardCommandLookupArg(TypedDict):
-  addrs: List[string]
-
-class L2ForwardCommandLookupResponse(TypedDict):
+class L2ForwardCommandLookupResponse(TypedDict, total=False):
   gates: List[uint64]
 
-class L2ForwardCommandPopulateArg(TypedDict):
-  base: string
-  count: int64
-  gate_count: int64
-
-class L2ForwardCommandSetDefaultGateArg(TypedDict):
-  gate: int64
-
-class LimitEntry(TypedDict):
-  key: string
-  value: int64
-
-class ListDriversResponse(TypedDict):
-  error: Error
-  driver_names: List[string]
-
-class ListGateHookClassResponse(TypedDict):
-  error: Error
-  names: List[string]
-
-class ListGateHooksResponse(TypedDict):
-  error: Error
-  hooks: List[GateHookInfo]
-
-class ListMclassResponse(TypedDict):
-  error: Error
-  names: List[string]
-
-class ListModulesResponse(TypedDict):
-  error: Error
-  modules: List[Module]
-
-class ListPluginsResponse(TypedDict):
-  error: Error
-  paths: List[string]
-
-class ListPortsResponse(TypedDict):
-  error: Error
-  ports: List[Port]
-
-class ListTcsRequest(TypedDict):
-  wid: int64
-
-class ListTcsResponse(TypedDict):
-  error: Error
-  classes_status: List[TrafficClassStatus]
-
-class ListWorkersResponse(TypedDict):
-  error: Error
-  workers_status: List[WorkerStatus]
-
-class MACSwapArg(TypedDict):
-  pass
-
-class MaxBurstEntry(TypedDict):
-  key: string
-  value: int64
-
-class MeasureArg(TypedDict):
-  offset: uint64
-  jitter_sample_prob: double
-  latency_ns_max: uint64
-  latency_ns_resolution: uint32
-
-class MeasureCommandGetSummaryArg(TypedDict):
-  clear: bool
-  latency_percentiles: List[double]
-  jitter_percentiles: List[double]
-
-class MeasureCommandGetSummaryResponse(TypedDict):
+class MeasureCommandGetSummaryResponse(TypedDict, total=False):
   timestamp: double
   packets: uint64
   bits: uint64
-  latency: Histogram
-  jitter: Histogram
+  latency: MeasureCommandGetSummaryResponseHistogram
+  jitter: MeasureCommandGetSummaryResponseHistogram
 
-class MempoolDump(TypedDict):
-  socket: int32
-  initialized: bool
-  mp_size: uint32
-  mp_cache_size: uint32
-  mp_element_size: uint32
-  mp_populated_size: uint32
-  mp_available_count: uint32
-  mp_in_use_count: uint32
-  ring_count: uint32
-  ring_free_count: uint32
-  ring_bytes: uint64
-
-class MergeArg(TypedDict):
-  pass
-
-class MetadataTestArg(TypedDict):
-  read: List[ReadEntry]
-  write: List[WriteEntry]
-  update: List[UpdateEntry]
-
-class Module(TypedDict):
-  name: string
-  mclass: string
-  desc: string
-
-class MplsPopArg(TypedDict):
-  remove_eth_header: bool
-  next_eth_type: uint32
-
-class NATArg(TypedDict):
-  ext_addrs: List[ExternalAddress]
-
-class NoOpArg(TypedDict):
-  pass
-
-class OGate(TypedDict):
-  ogate: uint64
-  cnt: uint64
-  pkts: uint64
-  bytes: uint64
-  timestamp: double
-  name: string
-  igate: uint64
-  gatehooks: List[GateHook]
-
-class PauseWorkerRequest(TypedDict):
-  wid: int64
-
-class PcapngArg(TypedDict):
-  fifo: string
-  defer: bool
-  reconnect: bool
-
-class Port(TypedDict):
-  name: string
-  driver: string
-  mac_addr: string
-  num_inc_q: uint64
-  num_out_q: uint64
-  size_inc_q: uint64
-  size_out_q: uint64
-  driver_arg: Any
-
-class PortConf(TypedDict):
-  mac_addr: string
-  mtu: uint32
-  admin_up: bool
-
-class PortIncArg(TypedDict):
-  port: string
-  prefetch: bool
-
-class PortIncCommandSetBurstArg(TypedDict):
-  burst: uint64
-
-class PortOutArg(TypedDict):
-  port: string
-
-class PortRange(TypedDict):
+class PortRange(TypedDict, total=False):
   begin: uint32
   end: uint32
   suspended: bool
 
-class QueueArg(TypedDict):
-  size: uint64
-  prefetch: bool
-  backpressure: bool
-
-class QueueCommandGetStatusArg(TypedDict):
-  pass
-
-class QueueCommandGetStatusResponse(TypedDict):
+class QueueCommandGetStatusResponse(TypedDict, total=False):
   count: uint64
   size: uint64
   enqueued: uint64
   dequeued: uint64
   dropped: uint64
 
-class QueueCommandSetBurstArg(TypedDict):
-  burst: uint64
-
-class QueueCommandSetSizeArg(TypedDict):
-  size: uint64
-
-class QueueIncArg(TypedDict):
-  port: string
-  qid: uint64
-  prefetch: bool
-
-class QueueIncCommandSetBurstArg(TypedDict):
-  burst: uint64
-
-class QueueOutArg(TypedDict):
-  port: string
-  qid: uint64
-
-class RandomSplitArg(TypedDict):
-  drop_rate: double
-  gates: List[int64]
-
-class RandomSplitCommandSetDroprateArg(TypedDict):
-  drop_rate: double
-
-class RandomSplitCommandSetGatesArg(TypedDict):
-  gates: List[int64]
-
-class RandomUpdateArg(TypedDict):
-  fields: List[Field]
-
-class RandomUpdateCommandClearArg(TypedDict):
+class RandomUpdateCommandClearArg(TypedDict, total=False):
   pass
 
-class ReadEntry(TypedDict):
+class ReadEntry(TypedDict, total=False):
   key: string
   value: int64
 
-class ReplicateArg(TypedDict):
-  gates: List[int64]
-
-class ReplicateCommandSetGatesArg(TypedDict):
-  gates: List[int64]
-
-class ResumeWorkerRequest(TypedDict):
-  wid: int64
-
-class RewriteArg(TypedDict):
-  templates: List[bytes]
-
-class RewriteCommandClearArg(TypedDict):
+class RewriteCommandClearArg(TypedDict, total=False):
   pass
 
-class RoundRobinArg(TypedDict):
-  gates: List[int64]
-  mode: string
-
-class RoundRobinCommandSetGatesArg(TypedDict):
-  gates: List[int64]
-
-class RoundRobinCommandSetModeArg(TypedDict):
-  mode: string
-
-class Rule(TypedDict):
+class Rule(TypedDict, total=False):
   src_ip: string
   dst_ip: string
   src_port: uint32
@@ -690,165 +179,38 @@ class Rule(TypedDict):
   established: bool
   drop: bool
 
-class SetMetadataArg(TypedDict):
-  attrs: List[Attribute]
-
-class SetPortConfRequest(TypedDict):
-  name: string
-  conf: PortConf
-
-class SinkArg(TypedDict):
+class UpdateCommandClearArg(TypedDict, total=False):
   pass
 
-class SourceArg(TypedDict):
-  pkt_size: uint64
-
-class SourceCommandSetBurstArg(TypedDict):
-  burst: uint64
-
-class SourceCommandSetPktSizeArg(TypedDict):
-  pkt_size: uint64
-
-class SplitArg(TypedDict):
-  size: uint64
-  attribute: string
-  offset: int64
-
-class Stat(TypedDict):
-  packets: uint64
-  dropped: uint64
-  bytes: uint64
-  requested_hist: List[uint64]
-  actual_hist: List[uint64]
-  diff_hist: List[uint64]
-
-class StaticNATArg(TypedDict):
-  pairs: List[AddressRangePair]
-
-class TcpdumpArg(TypedDict):
-  fifo: string
-  defer: bool
-  reconnect: bool
-
-class TimestampArg(TypedDict):
-  offset: uint64
-
-class TrackArg(TypedDict):
-  bits: bool
-
-class TrafficClass(TypedDict):
-  parent: string
-  name: string
-  blocked: bool
-  policy: string
-  resource: string
-  priority: int64
-  share: int64
-  wid: int64
-  limit: List[LimitEntry]
-  max_burst: List[MaxBurstEntry]
-  leaf_module_name: string
-  leaf_module_taskid: uint64
-
-class TrafficClassStatus(TypedDict):
-  klass: TrafficClass
-  parent: string
-
-class UnloadPluginRequest(TypedDict):
-  path: string
-
-class UpdateArg(TypedDict):
-  fields: List[Field]
-
-class UpdateCommandClearArg(TypedDict):
-  pass
-
-class UpdateEntry(TypedDict):
+class UpdateEntry(TypedDict, total=False):
   key: string
   value: int64
 
-class UpdateTcParamsRequest(TypedDict):
-  klass: TrafficClass
-
-class UpdateTcParentRequest(TypedDict):
-  klass: TrafficClass
-
-class Url(TypedDict):
+class Url(TypedDict, total=False):
   host: string
   path: string
 
-class UrlFilterArg(TypedDict):
-  blacklist: List[Url]
+class UrlFilterConfig(TypedDict, total=False):
+  blacklist: List[UrlFilterArgUrl]
 
-class UrlFilterConfig(TypedDict):
-  blacklist: List[Url]
-
-class VLANPopArg(TypedDict):
-  pass
-
-class VLANPushArg(TypedDict):
-  tci: uint64
-
-class VLANSplitArg(TypedDict):
-  pass
-
-class VXLANDecapArg(TypedDict):
-  pass
-
-class VXLANEncapArg(TypedDict):
-  dstport: uint64
-
-class VersionResponse(TypedDict):
-  error: Error
-  version: string
-
-class ViolatingClass(TypedDict):
-  name: string
-  constraint: int32
-  assigned_node: int32
-  assigned_core: int32
-
-class ViolatingModule(TypedDict):
-  name: string
-
-class WildcardMatchArg(TypedDict):
-  fields: List[Field]
-
-class WildcardMatchCommandAddArg(TypedDict):
+class WildcardMatchCommandAddArg(TypedDict, total=False):
   gate: uint64
   priority: int64
   values: List[FieldData]
   masks: List[FieldData]
 
-class WildcardMatchCommandClearArg(TypedDict):
+class WildcardMatchCommandClearArg(TypedDict, total=False):
   pass
 
-class WildcardMatchCommandDeleteArg(TypedDict):
-  values: List[FieldData]
-  masks: List[FieldData]
-
-class WildcardMatchCommandSetDefaultGateArg(TypedDict):
-  gate: uint64
-
-class WildcardMatchConfig(TypedDict):
+class WildcardMatchConfig(TypedDict, total=False):
   default_gate: uint64
   rules: List[WildcardMatchCommandAddArg]
 
-class WorkerGatesEntry(TypedDict):
+class WorkerGatesEntry(TypedDict, total=False):
   key: uint32
   value: uint32
 
-class WorkerSplitArg(TypedDict):
-  worker_gates: List[WorkerGatesEntry]
-
-class WorkerStatus(TypedDict):
-  wid: int64
-  core: int64
-  running: bool
-  num_tcs: int64
-  silent_drops: int64
-
-class WriteEntry(TypedDict):
+class WriteEntry(TypedDict, total=False):
   key: string
   value: int64
 
@@ -865,7 +227,8 @@ class ACL(BessModule):
 
   def __init__(
     self,
-    rules: List[Rule] = ...
+    rules: List[Rule] = ...,
+    name: str = ...
     ):
     """
     The module ACL creates an access control module which by default blocks all traffic, unless it contains a rule which specifies otherwise.
@@ -913,7 +276,8 @@ class ArpResponder(BessModule):
   def __init__(
     self,
     ip: string = ...,
-    mac_addr: string = ...
+    mac_addr: string = ...,
+    name: str = ...
     ):
     """
     The ARP Responder module is responding to ARP requests
@@ -961,7 +325,8 @@ class BPF(BessModule):
 
   def __init__(
     self,
-    filters: List[Filter] = ...
+    filters: List[Filter] = ...,
+    name: str = ...
     ):
     """
     The BPF module is an access control module that sends packets out on a particular gate based on whether they match a BPF filter.
@@ -1015,7 +380,8 @@ class Buffer(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     The Buffer module takes no parameters to initialize (ie, `Buffer()` is sufficient to create one).
@@ -1044,7 +410,8 @@ class Bypass(BessModule):
     self,
     cycles_per_batch: uint32 = ...,
     cycles_per_packet: uint32 = ...,
-    cycles_per_byte: uint32 = ...
+    cycles_per_byte: uint32 = ...,
+    name: str = ...
     ):
     """
     The Bypass module forwards packets by emulating pre-defined packet processing overhead.
@@ -1073,7 +440,8 @@ class DRR(BessModule):
     self,
     num_flows: uint32 = ...,
     quantum: uint64 = ...,
-    max_flow_queue_size: uint32 = ...
+    max_flow_queue_size: uint32 = ...,
+    name: str = ...
     ):
     """
     The Module DRR provides fair scheduling of flows based on a quantum which is
@@ -1126,7 +494,8 @@ class Dump(BessModule):
 
   def __init__(
     self,
-    interval: double = ...
+    interval: double = ...,
+    name: str = ...
     ):
     """
     The Dump module blindly forwards packets without modifying them. It periodically samples a packet and prints out out to the BESS log (by default stored in `/tmp/bessd.INFO`).
@@ -1166,7 +535,8 @@ class EtherEncap(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     The EtherEncap module wraps packets in an Ethernet header, but it takes no parameters. Instead, Ethernet source, destination, and type are pulled from a packet's metadata attributes.
@@ -1196,7 +566,8 @@ class ExactMatch(BessModule):
   def __init__(
     self,
     fields: List[Field] = ...,
-    masks: List[FieldData] = ...
+    masks: List[FieldData] = ...,
+    name: str = ...
     ):
     """
     The ExactMatch module splits packets along output gates according to exact match values in arbitrary packet fields.
@@ -1318,7 +689,8 @@ class FlowGen(BessModule):
     ip_src_range: uint32 = ...,
     ip_dst_range: uint32 = ...,
     port_src_range: uint32 = ...,
-    port_dst_range: uint32 = ...
+    port_dst_range: uint32 = ...,
+    name: str = ...
     ):
     """
     The FlowGen module generates simulated TCP flows of packets with correct SYN/FIN flags and sequence numbers.
@@ -1402,7 +774,8 @@ class GenericDecap(BessModule):
 
   def __init__(
     self,
-    bytes: uint64 = ...
+    bytes: uint64 = ...,
+    name: str = ...
     ):
     """
     The GenericDecap module strips off the first few bytes of data from a packet.
@@ -1440,7 +813,8 @@ class GenericEncap(BessModule):
 
   def __init__(
     self,
-    fields: List[EncapField] = ...
+    fields: List[EncapField] = ...,
+    name: str = ...
     ):
     """
     The GenericEncap module adds a header to packets passing through it.
@@ -1480,7 +854,8 @@ class HashLB(BessModule):
     self,
     gates: List[int64] = ...,
     mode: string = ...,
-    fields: List[Field] = ...
+    fields: List[Field] = ...,
+    name: str = ...
     ):
     """
     The HashLB module partitions packets between output gates according to either
@@ -1548,7 +923,8 @@ class IPEncap(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     Encapsulates a packet with an IP header, where IP src, dst, and proto are filled in
@@ -1576,7 +952,8 @@ class IPLookup(BessModule):
   def __init__(
     self,
     max_rules: uint32 = ...,
-    max_tbl8s: uint32 = ...
+    max_tbl8s: uint32 = ...,
+    name: str = ...
     ):
     """
     An IPLookup module perfroms LPM lookups over a packet destination.
@@ -1657,7 +1034,8 @@ class L2Forward(BessModule):
   def __init__(
     self,
     size: int64 = ...,
-    bucket: int64 = ...
+    bucket: int64 = ...,
+    name: str = ...
     ):
     """
     An L2Forward module forwards packets to an output gate according to exact-match rules over
@@ -1767,7 +1145,8 @@ class MACSwap(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     The MACSwap module takes no arguments. It swaps the src/destination MAC addresses
@@ -1792,7 +1171,8 @@ class MPLSPop(BessModule):
   def __init__(
     self,
     remove_eth_header: bool = ...,
-    next_eth_type: uint32 = ...
+    next_eth_type: uint32 = ...,
+    name: str = ...
     ):
     """
     The MPLS pop module removes MPLS labels
@@ -1841,7 +1221,8 @@ class Measure(BessModule):
     offset: uint64 = ...,
     jitter_sample_prob: double = ...,
     latency_ns_max: uint64 = ...,
-    latency_ns_resolution: uint32 = ...
+    latency_ns_resolution: uint32 = ...,
+    name: str = ...
     ):
     """
     The measure module tracks latencies, packets per second, and other statistics.
@@ -1908,7 +1289,8 @@ class Merge(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     The merge module takes no parameters. It has multiple input gates,
@@ -1931,7 +1313,8 @@ class MetadataTest(BessModule):
     self,
     read: List[ReadEntry] = ...,
     write: List[WriteEntry] = ...,
-    update: List[UpdateEntry] = ...
+    update: List[UpdateEntry] = ...,
+    name: str = ...
     ):
     """
     The MetadataTest module is used for internal testing purposes.
@@ -1959,7 +1342,8 @@ class NAT(BessModule):
 
   def __init__(
     self,
-    ext_addrs: List[ExternalAddress] = ...
+    ext_addrs: List[ExternalAddress] = ...,
+    name: str = ...
     ):
     """
     The NAT module implements Dynamic IPv4 address/port translation,
@@ -2003,12 +1387,25 @@ class NoOP(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     This module is used for testing purposes.
     """
     ...
+
+
+class PCAPPort(Port):
+  """
+  libpcap live packet capture from Linux port
+  """
+
+
+class PMDPort(Port):
+  """
+  DPDK poll mode driver
+  """
 
 
 class PortInc(BessModule):
@@ -2027,7 +1424,8 @@ class PortInc(BessModule):
   def __init__(
     self,
     port: string = ...,
-    prefetch: bool = ...
+    prefetch: bool = ...,
+    name: str = ...
     ):
     """
     The PortInc module connects a physical or virtual port and releases
@@ -2076,7 +1474,8 @@ class PortOut(BessModule):
 
   def __init__(
     self,
-    port: string = ...
+    port: string = ...,
+    name: str = ...
     ):
     """
     The PortOut module connects to a physical or virtual port and pushes
@@ -2110,7 +1509,8 @@ class Queue(BessModule):
     self,
     size: uint64 = ...,
     prefetch: bool = ...,
-    backpressure: bool = ...
+    backpressure: bool = ...,
+    name: str = ...
     ):
     """
     The Queue module implements a simple packet queue.
@@ -2214,7 +1614,8 @@ class QueueInc(BessModule):
     self,
     port: string = ...,
     qid: uint64 = ...,
-    prefetch: bool = ...
+    prefetch: bool = ...,
+    name: str = ...
     ):
     """
     The module QueueInc produces input packets from a physical or virtual port.
@@ -2261,7 +1662,8 @@ class QueueOut(BessModule):
   def __init__(
     self,
     port: string = ...,
-    qid: uint64 = ...
+    qid: uint64 = ...,
+    name: str = ...
     ):
     """
     The QueueOut module releases packets to a physical or virtual port.
@@ -2291,7 +1693,8 @@ class RandomSplit(BessModule):
   def __init__(
     self,
     drop_rate: double = ...,
-    gates: List[int64] = ...
+    gates: List[int64] = ...,
+    name: str = ...
     ):
     """
     The RandomSplit module randomly split/drop packets
@@ -2342,7 +1745,8 @@ class RandomUpdate(BessModule):
 
   def __init__(
     self,
-    fields: List[Field] = ...
+    fields: List[RandomUpdateArgField] = ...,
+    name: str = ...
     ):
     """
     The RandomUpdate module rewrites a specified field (`offset` and `size`) in a packet
@@ -2357,7 +1761,7 @@ class RandomUpdate(BessModule):
 
   def add(
     self,
-    fields: List[Field] = ...
+    fields: List[RandomUpdateArgField] = ...
     ):
     """
     The RandomUpdate module rewrites a specified field (`offset` and `size`) in a packet
@@ -2393,7 +1797,8 @@ class Replicate(BessModule):
 
   def __init__(
     self,
-    gates: List[int64] = ...
+    gates: List[int64] = ...,
+    name: str = ...
     ):
     """
     The Replicate module makes copies of a packet sending one copy out over each
@@ -2433,7 +1838,8 @@ class Rewrite(BessModule):
 
   def __init__(
     self,
-    templates: List[bytes] = ...
+    templates: List[bytes] = ...,
+    name: str = ...
     ):
     """
     The Rewrite module replaces an entire packet body with a packet "template"
@@ -2487,7 +1893,8 @@ class RoundRobin(BessModule):
   def __init__(
     self,
     gates: List[int64] = ...,
-    mode: string = ...
+    mode: string = ...,
+    name: str = ...
     ):
     """
     The RoundRobin module splits packets from one input gate across multiple output
@@ -2540,7 +1947,8 @@ class SetMetadata(BessModule):
 
   def __init__(
     self,
-    attrs: List[Attribute] = ...
+    attrs: List[SetMetadataArgAttribute] = ...,
+    name: str = ...
     ):
     """
     The SetMetadata module adds metadata attributes to packets, which are not stored
@@ -2571,7 +1979,8 @@ class Sink(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     The sink module drops all packets that are sent to it.
@@ -2594,7 +2003,8 @@ class Source(BessModule):
 
   def __init__(
     self,
-    pkt_size: uint64 = ...
+    pkt_size: uint64 = ...,
+    name: str = ...
     ):
     """
     The Source module generates packets with no payload contents.
@@ -2648,7 +2058,8 @@ class Split(BessModule):
     self,
     size: uint64 = ...,
     attribute: string = ...,
-    offset: int64 = ...
+    offset: int64 = ...,
+    name: str = ...
     ):
     """
     The Split module is a basic classifier which directs packets out a gate
@@ -2690,7 +2101,8 @@ class StaticNAT(BessModule):
 
   def __init__(
     self,
-    pairs: List[AddressRangePair] = ...
+    pairs: List[AddressRangePair] = ...,
+    name: str = ...
     ):
     """
     Static NAT module implements one-to-one translation of source/destination
@@ -2744,7 +2156,8 @@ class Timestamp(BessModule):
 
   def __init__(
     self,
-    offset: uint64 = ...
+    offset: uint64 = ...,
+    name: str = ...
     ):
     """
     The timestamp module takes an offset parameter. It inserts the current
@@ -2756,6 +2169,12 @@ class Timestamp(BessModule):
     __Output Gates__: 1
     """
     ...
+
+
+class UnixSocketPort(Port):
+  """
+  packet exchange via a UNIX domain socket
+  """
 
 
 class Update(BessModule):
@@ -2770,7 +2189,8 @@ class Update(BessModule):
 
   def __init__(
     self,
-    fields: List[Field] = ...
+    fields: List[UpdateArgField] = ...,
+    name: str = ...
     ):
     """
     The Update module rewrites a field in a packet's data with a specific value.
@@ -2784,7 +2204,7 @@ class Update(BessModule):
 
   def add(
     self,
-    fields: List[Field] = ...
+    fields: List[UpdateArgField] = ...
     ):
     """
     The Update module rewrites a field in a packet's data with a specific value.
@@ -2828,7 +2248,8 @@ class UrlFilter(BessModule):
 
   def __init__(
     self,
-    blacklist: List[Url] = ...
+    blacklist: List[Url] = ...,
+    name: str = ...
     ):
     """
     The URLFilter performs TCP reconstruction over a flow and blocks
@@ -2907,7 +2328,8 @@ class VLANPop(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     VLANPop removes the VLAN tag.
@@ -2930,7 +2352,8 @@ class VLANPush(BessModule):
 
   def __init__(
     self,
-    tci: uint64 = ...
+    tci: uint64 = ...,
+    name: str = ...
     ):
     """
     VLANPush appends a VLAN tag with a specified TCI value.
@@ -2968,7 +2391,8 @@ class VLANSplit(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     Splits packets across output gates according to VLAN id (e.g., id 3 goes out gate 3).
@@ -2977,6 +2401,12 @@ class VLANSplit(BessModule):
     __Output Gates__: many
     """
     ...
+
+
+class VPort(Port):
+  """
+  Virtual port for Linux host
+  """
 
 
 class VXLANDecap(BessModule):
@@ -2990,7 +2420,8 @@ class VXLANDecap(BessModule):
   """
 
   def __init__(
-    self
+    self,
+    name: str = ...
     ):
     """
     VXLANDecap module decapsulates a VXLAN header on a packet.
@@ -3013,7 +2444,8 @@ class VXLANEncap(BessModule):
 
   def __init__(
     self,
-    dstport: uint64 = ...
+    dstport: uint64 = ...,
+    name: str = ...
     ):
     """
     VXLANEncap module wraps a packet in a VXLAN header with a specified destination port.
@@ -3042,7 +2474,8 @@ class WildcardMatch(BessModule):
 
   def __init__(
     self,
-    fields: List[Field] = ...
+    fields: List[Field] = ...,
+    name: str = ...
     ):
     """
     The WildcardMatch module matches over multiple fields in a packet and
@@ -3158,7 +2591,8 @@ class WorkerSplit(BessModule):
 
   def __init__(
     self,
-    worker_gates: List[WorkerGatesEntry] = ...
+    worker_gates: List[WorkerGatesEntry] = ...,
+    name: str = ...
     ):
     """
     WorkerSplit splits packets based on the worker calling ProcessBatch(). It has

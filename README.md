@@ -9,8 +9,8 @@ The [Bess](https://github.com/NetSys/bess) scripting/configuration
 language is basically python with some syntactic sugar and global
 variables.  pyls-bess relies on
 [bess-gen-doc](https://github.com/nemethf/bess-gen-doc) for the global
-variables (see [mclass.py](pyls_bess/bess_doc/mclass.py) and
-[mclass.min.json.gz](pyls_bess/bess_doc/mclass.min.json.gz)).  It uses
+variables (see [globals.py](pyls_bess/bess_doc/globals.py) and
+[globals.min.json.gz](pyls_bess/bess_doc/globals.min.json.gz)).  It uses
 very simple heuristics to understand the syntactic sugar.
 
 pyls-bess should work with any text editor supporting the [language

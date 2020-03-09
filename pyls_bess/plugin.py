@@ -78,7 +78,7 @@ def new_source(self):
     if 'apply_change' in [s.function for s in stack[1:3]]:
         return src
 
-    import_line = 'from pyls_bess.bess_doc.mclass import *'
+    import_line = 'from pyls_bess.bess_doc.globals import *'
     if getattr(self, 'prepend_import_to_source', False):
         # Insert an extra line and adjust line numbers later with
         # fix_offset().
@@ -214,7 +214,7 @@ def process_refs(config, document, goto_kind, outcome):
     if goto_kind != 'highlight':
         defs = insert_bess_refs(config, document, goto_kind, defs)
 
-    outcome.force_result([defs])
+    outcome.force_result([[d for d in defs if d]])
 
 def get_spath(config, document=None, filename=None):
     document_path = document and document.path
@@ -234,10 +234,10 @@ def get_mpath(filename=None):
     return path
 
 db = {}
-def get_mclass_db():
+def get_globals_db():
     global db
     if not db:
-        with gzip.open(get_mpath('mclass.min.json.gz')) as f:
+        with gzip.open(get_mpath('globals.min.json.gz')) as f:
             db = json.load(f)
         msg_full = {m['fullName']: m for m in db['msg']}
         msg_short = {m['name']: m for m in db['msg']}
@@ -259,7 +259,7 @@ def get_ref_types(config, document, goto_kind):
             'references': [
                 "project",
                 "cpp_definition",
-                "mclass",
+                "globals",
                 "protobuf",
                 "examples",
             ],
@@ -270,7 +270,7 @@ def get_ref_types(config, document, goto_kind):
 
 def make_abs_bess_filename(config, document, filename):
     if type(filename) == int:
-        db = get_mclass_db()
+        db = get_globals_db()
         if filename == 0:
             filename = get_mpath(db['files'][str(filename)])
         else:
@@ -293,16 +293,16 @@ def conv_loc(config, document, loc):
 
 def insert_bess_refs(config, document, goto_kind, refs):
     ref_groups = collections.defaultdict(list)
-    mclass_uri = uris.uri_with(document.uri,
-                               path=get_mpath('mclass.py'))
-    db = get_mclass_db()
+    globals_uri = uris.uri_with(document.uri,
+                                path=get_mpath('globals.py'))
+    db = get_globals_db()
     for ref in refs:
-        if not (ref['uri'] == mclass_uri):
+        if not (ref['uri'] == globals_uri):
             ref_groups['project'].append(ref)
             continue
-        ref_groups['mclass'].append(ref)
+        ref_groups['globals'].append(ref)
         mline = ref['range']['start']['line']
-        for mclass in db['mclass']:
+        for mclass in db['globals']:
             for cmd in [mclass] + mclass['cmds']:
                 if mline == cmd.get('line', 0) - 1:
                     break
