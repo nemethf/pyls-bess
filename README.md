@@ -54,7 +54,7 @@ with emacs/[eglot](https://github.com/joaotavora/eglot).
   
 ## Installation
 
-Install with `python setup.py install`.
+Install with `pip3 install .`.
 
 ## Configuration
 

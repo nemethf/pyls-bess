@@ -34,6 +34,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
+# Based on bess version: v0.4.0-145-gbf17211d
+
 from pybess.module import Module as BessModule # type: ignore
 from pybess.port import Port # type: ignore
 from pybess.bess import BESS # type: ignore
@@ -43,7 +45,6 @@ bess = BESS()
 from typing import List, Any
 from mypy_extensions import TypedDict
 
-bytes = str
 double = float
 fixed32 = int
 fixed64 = int
@@ -101,11 +102,6 @@ class ExternalAddress(TypedDict, total=False):
   ext_addr: string
   port_ranges: List[PortRange]
 
-class Field(TypedDict, total=False):
-  attr_name: string
-  offset: uint32
-  num_bytes: uint32
-
 class RandomUpdateArgField(TypedDict, total=False):
   offset: int64
   size: uint64
@@ -116,6 +112,11 @@ class UpdateArgField(TypedDict, total=False):
   offset: int64
   size: uint64
   value: uint64
+
+class Field(TypedDict, total=False):
+  attr_name: string
+  offset: uint32
+  num_bytes: uint32
 
 class FieldData(TypedDict, total=False):
   value_bin: bytes

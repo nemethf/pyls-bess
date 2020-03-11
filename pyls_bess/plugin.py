@@ -23,6 +23,9 @@ import json
 import logging
 import os
 import re
+from pathlib import Path
+from threading import Timer
+
 from pyls import hookimpl, lsp, uris
 from pyls.config import config as pyls_config
 
@@ -138,10 +141,24 @@ def pyls_initialize(config, workspace):
         pattern = "^(" + '|'.join(messages) + r')\b'
         lint_ignored_regex[module] = re.compile(pattern)
 
-    diag = ''
-    if not os.path.exists(os.path.join(workspace.bess_dir, 'bessctl')):
-        diag = f'Bess sources not found in {workspace.bess_dir}'
-    workspace.bess_init_diag = diag
+    msg = None
+    bessctl = Path(workspace.bess_dir) / 'bessctl'
+    version_h = Path(workspace.bess_dir) / 'core' / 'version.h'
+    version = 'unknown'
+    db = get_globals_db()
+    if not bessctl.exists():
+        msg = f'Bess sources not found in {workspace.bess_dir}'
+    elif version_h.exists():
+        match = re.search(r'"(.*)"', version_h.read_text())
+        if match:
+            version = match.group(1)
+    if version != 'unknown' and version != db['bess-version']:
+        msg = 'Different bess versions. Source: %s, pyls_bess: %s'
+        msg = msg % (version, db['bess-version'])
+    if not msg:
+        return
+    # Wait until the connection-setup finishes.
+    Timer(2, workspace.show_message, args=[msg, lsp.MessageType.Error]).start()
 
 @hookimpl(hookwrapper=True)
 def pyls_lint(workspace, document):
@@ -167,14 +184,6 @@ def pyls_lint(workspace, document):
     except Exception as e:
         return
     filtered = []
-    if workspace.bess_init_diag:
-        filtered.append([{
-            'source': 'pyls-bess',
-            'range': { 'start': {'line': 0, 'character': 0},
-                       'end': {'line':0, 'character': 100}},
-            'message': workspace.bess_init_diag,
-            'severity': lsp.DiagnosticSeverity.Warning
-        }])
     for res in result:
         filtered.append([r for r in res if keep_lint(r)])
     outcome.force_result(filtered)
