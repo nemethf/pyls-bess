@@ -44,6 +44,8 @@ with emacs/[eglot](https://github.com/joaotavora/eglot).
   
 * Type checking with [mypy](https://github.com/tomv564/pyls-mypy)
 
+  ![mypy](https://raw.githubusercontent.com/wiki/nemethf/pyls-bess/mypy.png)
+
   The mypy plugin detects that `Queue().get_status()['dequeue']` is
   incorrect because the return value of `get_status` has no key
   `dequeue`.  Pyls, however, cannot currently complete the possible
