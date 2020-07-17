@@ -82,15 +82,10 @@ def new_source(self):
         return src
 
     import_line = 'from pyls_bess.bess_doc.globals import *'
-    if getattr(self, 'prepend_import_to_source', False):
-        # Insert an extra line and adjust line numbers later with
-        # fix_offset().
+    if not src.startswith(import_line):
+        # Insert an extra line and adjust line numbers in return
+        # values later with fix_offset().
         src = import_line + "\n" + src
-    elif not src.startswith(import_line):
-        # Modify the first line, because we cannot adjust the line
-        # numbers later (e.g. in case of mypy.)  This might result in
-        # incorrect column numbers for the first line.
-        src = import_line + '; ' + src
     src = re.sub(r'\$\w(\w*)!', "'\\1'+", src)
 
     src, self.bess_rows_with_sugar = replace_double_colon(src)
@@ -101,19 +96,22 @@ def new_source(self):
     return src
 Document.source = new_source
 
-old_jedi_script = Document.jedi_script
-def new_jedi_script(self, position=None):
-    try:
-        new_position = position
-        if self.filename.endswith('.bess'):
-            self.prepend_import_to_source = True
-            if position:
-                new_position = position.copy()
-                new_position['line'] += 1
-        return old_jedi_script(self, new_position)
-    finally:
-        self.prepend_import_to_source = False
-Document.jedi_script = new_jedi_script
+from pyls.python_ls import PythonLanguageServer
+old_hook = PythonLanguageServer._hook
+def new_hook(self, hook_name, doc_uri=None, **kw):
+    if doc_uri is None or not doc_uri.endswith('.bess'):
+        return old_hook(self, hook_name, doc_uri, **kw)
+
+    if 'position' in kw:
+        kw['position']['line'] += 1
+    ret = old_hook(self, hook_name, doc_uri, **kw)
+    if 'position' in kw:
+        kw['position']['line'] -= 1
+
+    # Return values are adjusted back with 'hookwrappers' below
+    return ret
+PythonLanguageServer._hook = new_hook
+
 
 ###########################################################################
 
@@ -185,21 +183,21 @@ def pyls_lint(workspace, document):
         return
     filtered = []
     for res in result:
-        filtered.append([r for r in res if keep_lint(r)])
+        filtered.append([fix_offset(r, document) for r in res if keep_lint(r)])
     outcome.force_result(filtered)
 
 @hookimpl(hookwrapper=True)
-def pyls_definitions(config, document, position):
+def pyls_definitions(config, document):
     outcome = yield
     process_refs(config, document, 'definitions', outcome)
 
 @hookimpl(hookwrapper=True)
-def pyls_references(config, document, position, exclude_declaration=False):
+def pyls_references(config, document, exclude_declaration=False):
     outcome = yield
     process_refs(config, document, 'references', outcome)
 
 @hookimpl(hookwrapper=True)
-def pyls_document_highlight(config, document, position):
+def pyls_document_highlight(config, document):
     outcome = yield
     process_refs(config, document, 'highlight', outcome)
 
